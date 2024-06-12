@@ -1,80 +1,24 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
-import time
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-import uvicorn
+from flask import Flask, request, jsonify
+import requests
 
-app = FastAPI()
+app = Flask(__name__)
 
-def get_and_modify_text_from_main_page(driver):
-    page_content = driver.page_source
+API_KEY = 'goatbypassersontop'
+BASE_URL = 'http://45.90.13.151:6132/api/bypass'
 
-    soup = BeautifulSoup(page_content, 'html.parser')
-    text = soup.get_text()
+@app.route('/bypass', methods=['GET'])
+def bypass():
+    link = request.args.get('link')
 
-    modified_text = text.replace(
-        "Trying to bypass the Fluxus key system will get you banned from using Fluxus.",
-        "Error Please Try Again!"
-    )
+    if not link:
+        return jsonify({'error': 'Link parameter is required'}), 400
 
-    unwanted_texts = [
-        "\n\n\n\n\n\n\n\n\n\n\nFluxus | Main\n\n\n\n\n\n\n\n\nEnter your key into FluxusYour Key:\n\n\t\t\t\t",
-        "\t\t\t\n\n\n\nCopy Key\n\n\n\n\n"
-    ]
-    for unwanted in unwanted_texts:
-        modified_text = modified_text.replace(unwanted, '')
+    response = requests.get(BASE_URL, params={'link': link, 'api_key': API_KEY})
 
-    return modified_text
-
-@app.get("/&apikey=famzztzy/fluxus")
-async def process_link_request(request: Request):
-    start_time = time.time()
-
-    link = request.query_params.get('link')
-
-    chrome_options = Options()
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36")
-    driver = webdriver.Chrome(options=chrome_options)
-
-    print("Start Bypass")
-    driver.get(link)
-
-    if link.startswith("https://flux.li/android/external/start.php?HWID="):
-        driver.execute_script("window.location.replace('https://linkvertise.com/580726/fluxus1');")
-        driver.execute_script("window.location.replace('https://flux.li/android/external/check1.php');")
-        driver.execute_script("window.location.replace('https://linkvertise.com/580726/fluxus');")
-        driver.execute_script("window.location.replace('https://flux.li/android/external/main.php');")
-        driver.refresh()
-    elif "main.php" in driver.current_url:
-        pass
-
-    wait = WebDriverWait(driver, 10)
-    wait.until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-
-    text = get_and_modify_text_from_main_page(driver)
-
-    driver.quit()
-
-    print("Successfully!")
-
-    end_time = time.time()
-    time_taken = end_time - start_time
-
-    response = {
-        "discord": "https://discord.gg/vqnMxk4ygf",
-        "key": text,
-        "time taken": f"{time_taken:.2f} seconds"
-    }
-
-    return JSONResponse(content=response)
+    if response.status_code == 200:
+        return jsonify(response.json())
+    else:
+        return jsonify({'error': 'Failed to bypass the link'}), response.status_code
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=5000)
