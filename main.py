@@ -3,22 +3,34 @@ import requests
 
 app = Flask(__name__)
 
-API_KEY = 'goatbypassersontop'
-BASE_URL = 'http://45.90.13.151:6132/api/bypass'
+# API endpoint and key
+API_URL = 'https://madkung.vercel.app/fluxus-api'
+API_KEY = 'XqzyaenZishd33axPYPz'
 
-@app.route('/bypass', methods=['GET'])
-def bypass():
-    link = request.args.get('link')
+@app.route('/fluxus', methods=['GET'])
+def fluxus():
+    # Ambil parameter URL dari permintaan
+    target_url = request.args.get('url')
 
-    if not link:
-        return jsonify({'error': 'Link parameter is required'}), 400
+    # Pastikan parameter URL ada
+    if not target_url:
+        return jsonify({'error': 'URL parameter is required'}), 400
 
-    response = requests.get(BASE_URL, params={'link': link, 'api_key': API_KEY})
+    # Buat permintaan ke API eksternal
+    response = requests.get(API_URL, params={'url': target_url, 'api_key': API_KEY})
 
-    if response.status_code == 200:
-        return jsonify(response.json())
-    else:
-        return jsonify({'error': 'Failed to bypass the link'}), response.status_code
+    # Periksa apakah permintaan berhasil
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to fetch data from external API'}), response.status_code
+
+    # Ambil data JSON dari respons
+    data = response.json()
+
+    # Ganti teks 'ethos' dengan 'api' dalam data respons
+    modified_data = str(data).replace('mad6453', 'famzz')
+
+    # Kembalikan data yang dimodifikasi sebagai JSON
+    return jsonify(eval(modified_data))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
