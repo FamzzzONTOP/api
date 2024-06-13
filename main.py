@@ -17,7 +17,10 @@ def fluxus():
         return jsonify({'error': 'URL parameter is required'}), 400
 
     # Buat permintaan ke API eksternal
-    response = requests.get(API_URL, params={'url': target_url, 'api_key': API_KEY})
+    try:
+        response = requests.get(API_URL, params={'url': target_url, 'api_key': API_KEY})
+    except Exception as e:
+        return jsonify({'error': f'Failed to fetch data from external API: {str(e)}'}), 500
 
     # Periksa apakah permintaan berhasil
     if response.status_code != 200:
@@ -33,4 +36,4 @@ def fluxus():
     return jsonify(eval(modified_data))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
